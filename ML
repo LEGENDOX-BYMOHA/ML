@@ -1,0 +1,307 @@
+local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/memejames/elerium-v2-ui-library/main/Library", true))()
+local window = library:AddWindow("MOHAS SCRIPT  [FREE]", {
+    main_color = Color3.fromRGB(0, 255, 0), 
+    min_size = Vector2.new(580, 350),
+    can_resize = false, 
+    scrollable = true,
+})
+
+local homeTab = window:AddTab("HOME")
+local mainTab = window:AddTab("MAIN")
+local rebirthTab = window:AddTab("REBIRTH")
+local settingsTab = window:AddTab("SETTINGS")
+
+homeTab:AddLabel("SET SIZE")
+homeTab:AddLabel("Set Your Size")
+
+local size
+local sizeInput = homeTab:AddTextBox("Size", function(value)
+    size = tonumber(value)
+end, {
+    ["clear"] = false,
+    ["placeholder"] = "Enter size (1-100)"
+})
+
+local sizeToggle = homeTab:AddSwitch("Enable Size", function(state)
+    if state then
+        if size and size >= 1 and size <= 100 then
+            SetPlayerSize(size)
+        else
+            print("Invalid size. Please enter a value between 1 and 100.")
+        end
+    else
+        print("Size change disabled.")
+    end
+end)
+
+local function SetPlayerSize(size)
+    local character = game.Players.LocalPlayer.Character
+    if character then
+        local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+        if humanoidRootPart then
+            humanoidRootPart.Size = Vector3.new(size, size, size)
+            humanoidRootPart.Transparency = 0.5
+        end
+    end
+    print("Player size set to:", size)
+end
+
+homeTab:AddLabel("Lock Character Position:")
+local lockPositionToggle = homeTab:AddSwitch("Lock Position", function(bool)
+    if bool then
+        game.Players.LocalPlayer.Character.HumanoidRootPart.Anchored = true
+        print("Character Position Locked")
+    else
+        game.Players.LocalPlayer.Character.HumanoidRootPart.Anchored = false
+        print("Character Position Unlocked")
+    end
+end)
+lockPositionToggle:Set(false)
+
+homeTab:AddLabel("Teleport:")
+local teleportDropdown = homeTab:AddDropdown("Select Gym", function(selectedGym)
+    local gymCoordinates = {
+        ["BEACH"] = Vector3.new(0, 0, 0),
+        ["FROST GYM"] = Vector3.new(-2650,7,-393),
+        ["MYTHICAL GYM"] = Vector3.new(20, 0, 20),
+        ["ETERNAL GYM"] = Vector3.new(2392,7, 982),
+        ["INFERNO GYM"] = Vector3.new(-6895,7,-1290),
+        ["LEGEND GYM"] = Vector3.new(4429,991,-3880),
+        ["MUSCLE KING GYM"] = Vector3.new(-8799,17,-5798),
+        ["JUNGLE GYM"] = Vector3.new(-7894,6,2386),
+    }
+    local coordinates = gymCoordinates[selectedGym]
+    if coordinates then
+        print("Teleporting to", selectedGym, "at coordinates", coordinates)
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(coordinates)
+    else
+        print("Invalid Gym Selected")
+    end
+end)
+teleportDropdown:Add("BEACH")
+teleportDropdown:Add("FROST GYM")
+teleportDropdown:Add("MYTHICAL GYM")
+teleportDropdown:Add("ETERNAL GYM")
+teleportDropdown:Add("INFERNO GYM")
+teleportDropdown:Add("LEGEND GYM")
+teleportDropdown:Add("MUSCLE KING GYM")
+teleportDropdown:Add("JUNGLE GYM")
+
+mainTab:AddLabel("AUTO FUNCTIONS:")
+
+local autoWeightCor, autoPushupsCor, autoPunchCor, autoKillCor, autoHitRockCor
+
+local autoWeightToggle = mainTab:AddSwitch("Auto Weight", function(state)
+    if state then
+        autoWeightCor = coroutine.create(function()
+            while true do
+                local character = game.Players.LocalPlayer.Character
+                if character then
+                    local tool = character:FindFirstChildOfClass("Tool")
+                    if tool then
+                        tool:Activate()
+                    end
+                end
+                wait(1)
+            end
+        end)
+        coroutine.resume(autoWeightCor)
+        print("Auto Weight enabled")
+    else
+        if autoWeightCor then
+            coroutine.close(autoWeightCor)
+        end
+        print("Auto Weight disabled")
+    end
+end)
+
+local autoPushupsToggle = mainTab:AddSwitch("Auto Pushups", function(state)
+    if state then
+        autoPushupsCor = coroutine.create(function()
+            while true do
+                game:GetService("ReplicatedStorage").Pushups:FireServer()
+                wait(1)
+            end
+        end)
+        coroutine.resume(autoPushupsCor)
+        print("Auto Pushups enabled")
+    else
+        if autoPushupsCor then
+            coroutine.close(autoPushupsCor)
+        end
+        print("Auto Pushups disabled")
+    end
+end)
+
+local autoPunchToggle = mainTab:AddSwitch("Auto Punch", function(state)
+    if state then
+        autoPunchCor = coroutine.create(function()
+            while true do
+                game:GetService("ReplicatedStorage").Punch:FireServer()
+                wait(1)
+            end
+        end)
+        coroutine.resume(autoPunchCor)
+        print("Auto Punch enabled")
+    else
+        if autoPunchCor then
+            coroutine.close(autoPunchCor)
+        end
+        print("Auto Punch disabled")
+    end
+end)
+
+mainTab:AddLabel("Hit Rock:")
+local rockDropdown = mainTab:AddDropdown("Select Rock", function(selectedRock)
+    local rockCoordinates = {
+        ["JUNGLE ROCK"] = Vector3.new(-7696,6, -2955),
+        ["MUSCLE KING ROCK"] = Vector3.new(-9040,9,-6050),
+        ["LEGEND GYM ROCK"] = Vector3.new(-4188,991,-4064),
+    }
+    local coordinates = rockCoordinates[selectedRock]
+    if coordinates then
+        print("Hitting", selectedRock, "at coordinates", coordinates)
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(coordinates)
+        autoHitRockCor = coroutine.create(function()
+            while true do
+                game:GetService("ReplicatedStorage").HitRock:FireServer(coordinates)
+                wait(1)
+            end
+        end)
+        coroutine.resume(autoHitRockCor)
+    else
+        print("Invalid Rock Selected")
+    end
+end)
+rockDropdown:Add("JUNGLE ROCK")
+rockDropdown:Add("MUSCLE KING ROCK")
+rockDropdown:Add("LEGEND GYM ROCK")
+
+mainTab:AddLabel("Killing Content:")
+local autoKillToggle = mainTab:AddSwitch("Auto Kill", function(state)
+    if state then
+        autoKillCor = coroutine.create(function()
+            while true do
+                for _, player in ipairs(game.Players:GetPlayers()) do
+                    if not table.find(whitelist, player.Name) then
+                        KillPlayer(player.Name)
+                    end
+                end
+                wait(1)
+            end
+        end)
+        coroutine.resume(autoKillCor)
+        print("Auto Kill enabled")
+    else
+        if autoKillCor then
+            coroutine.close(autoKillCor)
+        end
+        print("Auto Kill disabled")
+    end
+end)
+
+local whitelist = {}
+
+local whitelistDropdown = mainTab:AddDropdown("Whitelist Player", function(selectedPlayer)
+    table.insert(whitelist, selectedPlayer)
+    print("Added to whitelist:", selectedPlayer)
+end)
+
+local killPlayerDropdown = mainTab:AddDropdown("Kill This Player", function(selectedPlayer)
+    KillPlayer(selectedPlayer)
+end)
+
+local function KillPlayer(playerName)
+    local player = game.Players:FindFirstChild(playerName)
+    if player and player.Character then
+        player.Character.Humanoid.Health = 0
+        print("Killed player:", playerName)
+    end
+end
+
+for _, player in ipairs(game.Players:GetPlayers()) do
+    whitelistDropdown:Add(player.Name)
+    killPlayerDropdown:Add(player.Name)
+end
+
+game.Players.PlayerAdded:Connect(function(player)
+    whitelistDropdown:Add(player.Name)
+    killPlayerDropdown:Add(player.Name)
+end)
+
+game.Players.PlayerRemoving:Connect(function(player)
+    whitelistDropdown:Remove(player.Name)
+    killPlayerDropdown:Remove(player.Name)
+end)
+
+-- Rebirth Tab
+rebirthTab:AddLabel("REBIRTH FUNCTIONS:")
+
+local autoRebirthToggle = rebirthTab:AddSwitch("Auto Rebirth", function(state)
+    if state then
+        coroutine.wrap(function()
+            while true do
+                game:GetService("ReplicatedStorage").rEvents.rebirthRemote:InvokeServer("rebirthRequest")
+                wait(0.5)
+            end
+        end)()
+        print("Auto Rebirth enabled")
+    else
+        print("Auto Rebirth disabled")
+    end
+end)
+
+local rebirthSetButton = rebirthTab:AddButton("Set Rebirth", function()
+    local r = game:GetService("ReplicatedStorage").rEvents.rebirthRemote
+    local p = game:GetService("Players").LocalPlayer
+    local l = p:FindFirstChild("leaderstats") and p.leaderstats:FindFirstChild("Rebirths")
+    if l and l.Value > 5000 then
+        task.wait(0.333333333333)
+        r:InvokeServer("rebirthRequest")
+    end
+    print("Rebirth set if conditions met")
+end)
+
+-- Auto Punch (No Animation)
+mainTab:AddLabel("AUTO PUNCH 2:")
+mainTab:CreateToggle({
+    Name = "Auto Punch (No Animation)",
+    CurrentValue = false,
+    Callback = function(toggleState)
+        local function Equip(t, h)
+            local p = game:GetService("Players").LocalPlayer
+            local b, c = p:FindFirstChild("Backpack"), p.Character or p.CharacterAdded:Wait()
+            if b then
+                local T = b:FindFirstChild(t)
+                if T then
+                    T.Parent = c
+                    if h then
+                        T.Parent = b
+                    end
+                end
+            end
+        end
+
+        if toggleState then
+            Equip("Pushups", false)
+            local player = game.Players.LocalPlayer
+            local playerName = player.Name
+            local punchTool = player.Backpack:FindFirstChild("Punch") or game.Workspace:FindFirstChild(playerName):FindFirstChild("Punch")
+            _G.punchanim = true
+
+            while _G.punchanim do
+                if punchTool then
+                    if punchTool.Parent ~= game.Workspace:FindFirstChild(playerName) then
+                        punchTool.Parent = game.Workspace:FindFirstChild(playerName)
+                    end
+                    punchTool:Activate()
+                    wait()
+                else
+                    _G.punchanim = false
+                end
+            end
+        else
+            _G.punchanim = false
+        end
+    end
+})
